@@ -43,7 +43,7 @@
             $this->_output = array();
         }
 
-        public function getIterator()
+        public function getIterator(): \Traversable
         {
             return new \ArrayIterator($this->_output);
         }
