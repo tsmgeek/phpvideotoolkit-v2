@@ -660,14 +660,13 @@
             }
             
 //          check that some data has been obtained
-            $data = array();
             if(empty($raw_data) === true)
             {
                 // TODO possible error/exception here.
             }
             
-            $this->_cacheSet($cache_key, $data);
-            return $data;
+            $this->_cacheSet($cache_key, $raw_data);
+            return $raw_data;
         }
     }
     
