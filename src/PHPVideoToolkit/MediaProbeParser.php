@@ -314,6 +314,12 @@
                         'metadata'              => isset($data_stream['meta']) === true ? $data_stream['meta'] : null,
                         'disposition'           => isset($data_stream['disposition']) === true ? $data_stream['disposition'] : null,
                     );
+                    if ($data['metadata'] == null) {
+                        $data['metadata'] = isset($data['metadata']) === true ? $data['metadata'] : null;
+                    }
+                    if ($data['rotation'] == null) {
+                        $data['rotation'] = isset($data['metadata']['rotate']) === true ? $data['metadata']['rotate'] : null;
+                    }
                     $data['codec']['raw']   = trim($data['codec']['name'].' ('.trim($data['codec']['tag_string'].' / '.$data['codec']['tag'], '/').')');
 
                     // Unused but available data within the stream
@@ -401,6 +407,9 @@
                         'metadata'          => isset($data_stream['meta']) === true ? $data_stream['meta'] : null,
                         'disposition'       => isset($data_stream['disposition']) === true ? $data_stream['disposition'] : null,
                     );
+                    if ($data['metadata'] == null) {
+                        $data['metadata'] = isset($data['metadata']) === true ? $data['metadata'] : null;
+                    }
                     $data['codec']['raw']   = trim($data['codec']['name'].' ('.trim($data['codec']['tag_string'].' / '.$data['codec']['tag'], '/').')');
                     
                     // Unused but available data within the stream
