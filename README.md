@@ -178,6 +178,8 @@ _Video_
 - `VideoFormat_3gp`
 - `VideoFormat_Flv`
 - `VideoFormat_H264`
+- `VideoFormat_H265`
+- `VideoFormat_Av1`
 - `VideoFormat_Mkv`
 - `VideoFormat_Mp4`
 - `VideoFormat_Ogg`

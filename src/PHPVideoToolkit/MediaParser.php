@@ -494,6 +494,27 @@
                         }
                     }
                 }
+
+//              fill in rotation from side-data, when no main tag is used for rotation
+//              quite a corner case, but observed in vertical videos from iPhone SE
+                if(!isset($data['metadata']['rotate']))
+                {
+                    if(preg_match('/Side data:(.*?)Stream/ms', $raw_data, $side_matches) > 0)
+                    {
+                        if(preg_match_all('/([a-z\_]+)\s*\:\s+(.*)/', $side_matches[1], $side_matches) > 0)
+                        {
+                            if (count($side_matches) > 2
+                                && isset($side_matches[1][0])
+                                && $side_matches[1][0] === 'displaymatrix'
+                                && isset($side_matches[2][0])
+                                && strpos($side_matches[2][0], 'rotation of') === 0
+                                && preg_match('/rotation of (.*) degrees/ms', $side_matches[2][0], $rotation_matches) > 0
+                            ) {
+                                $data['metadata']['rotate'] = $rotation_matches[1];
+                            }
+                        }
+                    }
+                }
                 
 //              do we have a meta data rotation?
                 if(isset($data['metadata']['rotate']) === true)
