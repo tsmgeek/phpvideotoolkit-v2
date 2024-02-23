@@ -315,7 +315,7 @@
                         'disposition'           => isset($data_stream['disposition']) === true ? $data_stream['disposition'] : null,
                     );
                     if ($data['metadata'] == null) {
-                        $data['metadata'] = isset(data_stream['metadata']) === true ? data_stream['metadata'] : null;
+                        $data['metadata'] = isset($data_stream['metadata']) === true ? $data_stream['metadata'] : null;
                     }
                     if ($data['rotation'] == null) {
                         $data['rotation'] = isset($data['metadata']['rotate']) === true ? $data['metadata']['rotate'] : null;
@@ -408,7 +408,7 @@
                         'disposition'       => isset($data_stream['disposition']) === true ? $data_stream['disposition'] : null,
                     );
                     if ($data['metadata'] == null) {
-                        $data['metadata'] = isset(data_stream['metadata']) === true ? data_stream['metadata'] : null;
+                        $data['metadata'] = isset($data_stream['metadata']) === true ? $data_stream['metadata'] : null;
                     }
                     $data['codec']['raw']   = trim($data['codec']['name'].' ('.trim($data['codec']['tag_string'].' / '.$data['codec']['tag'], '/').')');
                     
