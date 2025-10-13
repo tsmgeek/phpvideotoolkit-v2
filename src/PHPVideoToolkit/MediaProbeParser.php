@@ -314,6 +314,12 @@
                         'metadata'              => isset($data_stream['meta']) === true ? $data_stream['meta'] : null,
                         'disposition'           => isset($data_stream['disposition']) === true ? $data_stream['disposition'] : null,
                     );
+                    if ($data['metadata'] == null) {
+                        $data['metadata'] = isset($data_stream['metadata']) === true ? $data_stream['metadata'] : null;
+                    }
+                    if ($data['rotation'] == null) {
+                        $data['rotation'] = isset($data['metadata']['rotate']) === true ? $data['metadata']['rotate'] : null;
+                    }
                     $data['codec']['raw']   = trim($data['codec']['name'].' ('.trim($data['codec']['tag_string'].' / '.$data['codec']['tag'], '/').')');
 
                     // Unused but available data within the stream
@@ -401,6 +407,9 @@
                         'metadata'          => isset($data_stream['meta']) === true ? $data_stream['meta'] : null,
                         'disposition'       => isset($data_stream['disposition']) === true ? $data_stream['disposition'] : null,
                     );
+                    if ($data['metadata'] == null) {
+                        $data['metadata'] = isset($data_stream['metadata']) === true ? $data_stream['metadata'] : null;
+                    }
                     $data['codec']['raw']   = trim($data['codec']['name'].' ('.trim($data['codec']['tag_string'].' / '.$data['codec']['tag'], '/').')');
                     
                     // Unused but available data within the stream
@@ -660,14 +669,13 @@
             }
             
 //          check that some data has been obtained
-            $data = array();
             if(empty($raw_data) === true)
             {
                 // TODO possible error/exception here.
             }
             
-            $this->_cacheSet($cache_key, $data);
-            return $data;
+            $this->_cacheSet($cache_key, $raw_data);
+            return $raw_data;
         }
     }
     
