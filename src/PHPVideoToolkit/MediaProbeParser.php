@@ -100,7 +100,6 @@
                     {
                         $duration = $timecode;
                     }
-                    }
                 }
                 $data = $duration;
             }
@@ -316,7 +315,7 @@
                         'start'                 => isset($data_stream['start_time']) === true ? new Timecode($data_stream['start_time'], Timecode::INPUT_FORMAT_SECONDS) : null,
                         'metadata'              => isset($data_stream['meta']) === true ? $data_stream['meta'] : null,
                         'disposition'           => isset($data_stream['disposition']) === true ? $data_stream['disposition'] : null,
-                         'side_data'             => isset($data_stream['side_data']) === true ? $data_stream['side_data'] : null,
+                        'side_data'             => isset($data_stream['side_data']) === true ? $data_stream['side_data'] : null,
                     );
                     if ($data['metadata'] == null) {
                         $data['metadata'] = isset($data_stream['metadata']) === true ? $data_stream['metadata'] : null;
