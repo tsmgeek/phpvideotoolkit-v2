@@ -58,20 +58,20 @@
             return $this;
         }
         
-        public function extractFrame(Timecode $timecode)
+        public function extractFrame(Timecode $timecode, Timecode|bool $validateTimecode = true)
         {
             if($this->_extracting_frames === true)
             {
                 throw new \LogicException('You cannot extract multiple frames and then extract a single frame in the same execution chain.');
             }
             
-            $this->extractSegment($timecode, $timecode);
+            $this->extractSegment($timecode, $timecode, validateTimecode: $validateTimecode);
             $this->_extracting_frame = true;
             
             return $this;
         }
         
-        public function extractFrames(Timecode $from_timecode=null, Timecode $to_timecode=null, $force_frame_rate=null)
+        public function extractFrames(Timecode $from_timecode=null, Timecode $to_timecode=null, $force_frame_rate=null, Timecode|bool $validateTimecode = true)
         {
             if($this->_extracting_frame === true)
             {
@@ -84,14 +84,14 @@
             
             if($from_timecode !== null || $to_timecode !== null)
             {
-                $this->extractSegment($from_timecode, $to_timecode);
+                $this->extractSegment($from_timecode, $to_timecode, validateTimecode: $validateTimecode);
             }
             $this->_extracting_frames = $force_frame_rate === null ? true : $force_frame_rate;
             
             return $this;
         }
         
-        protected function _savePreProcess(Format &$output_format=null, &$save_path, $overwrite, ProgressHandlerAbstract &$progress_handler=null)
+        protected function _savePreProcess(Format &$output_format=null, &$save_path, $overwrite, ?ProgressHandlerAbstract &$progress_handler=null)
         {
             parent::_savePreProcess($output_format, $save_path, $overwrite, $progress_handler);
             

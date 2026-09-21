@@ -124,7 +124,8 @@
                 $this->setAudioSampleFrequency(22050);
             }
             
-            $video_data = $this->_media_object->readVideoComponent();
+            $probe = new MediaProbeParser($this->_media_object->getConfig());
+            $video_data = $probe->getFileVideoComponent($this->_media_object->getMediaPath());
 
 //          check to see if the aspect ratio has fixed the width and heights, if so we must apply the size to any output.
             if($video_data['dimensions']['aspect_ratio_fix_warning'] === true)

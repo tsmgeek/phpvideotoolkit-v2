@@ -112,7 +112,9 @@
                 $return_data['fps'] = $parts[$last_key]['fps'];
                 $return_data['size'] = $parts[$last_key]['total_size'];
                 $return_data['duration'] = new Timecode($parts[$last_key]['out_time'], Timecode::INPUT_FORMAT_TIMECODE);
-                $return_data['percentage'] = ($return_data['duration']->total_seconds/$this->_total_duration->total_seconds)*100;
+                if ($this->_total_duration instanceof Timecode) {
+                    $return_data['percentage'] = ($return_data['duration']->total_seconds/$this->_total_duration->total_seconds)*100;
+                }
                 $return_data['dup'] = $parts[$last_key]['dup_frames'];
                 $return_data['drop'] = $parts[$last_key]['drop_frames'];
                     

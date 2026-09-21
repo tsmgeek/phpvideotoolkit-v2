@@ -24,6 +24,7 @@
         
         protected $_is_non_blocking_compatible = true;
          
+        protected $_total_duration;
         protected $_ffmpeg_process;
         protected $_temp_directory;
         
@@ -63,12 +64,20 @@
         {
             return $this->_is_non_blocking_compatible;
         }
-        
-        public function setTotalDuration(Timecode $duration)
+
+        public function setTotalDuration(Timecode|bool $duration)
         {
+            if ($duration === true) {
+                throw new \InvalidArgumentException('$duration must be either Timecode|false.');
+            }
             $this->_total_duration = $duration;
             
             return $this;
+        }
+
+        public function getTotalDuration()
+        {
+            return $this->_total_duration;
         }
 
         public function probe($probe_then_wait=true, $seconds=1)

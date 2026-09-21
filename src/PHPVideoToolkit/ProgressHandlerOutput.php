@@ -116,7 +116,9 @@
                 $return_data['fps'] = isset($matches['fps']) === true ? $matches['fps'][$last_key] : null;
                 $return_data['size'] = $matches['size'][$last_key];
                 $return_data['duration'] = new Timecode($matches['time'][$last_key], Timecode::INPUT_FORMAT_TIMECODE);
-                $return_data['percentage'] = ($return_data['duration']->total_seconds/$this->_total_duration->total_seconds)*100;
+                if ($this->_total_duration instanceof Timecode) {
+                    $return_data['percentage'] = ($return_data['duration']->total_seconds/$this->_total_duration->total_seconds)*100;
+                }
                 $return_data['dup'] = $matches['dup'][$last_key];
                 $return_data['drop'] = $matches['drop'][$last_key];
                 

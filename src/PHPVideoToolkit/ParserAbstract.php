@@ -68,6 +68,11 @@
         {
             return $this->_cacher;
         }
+
+        public function getConfig()
+        {
+            return $this->_config;
+        }
         
         /**
          * Gets a value from the class cache and if not found then looks into

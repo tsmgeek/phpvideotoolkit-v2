@@ -335,7 +335,7 @@
          * @param boolean $accurate If true then accuracy is prefered over performance.
          * @return Media
          */
-        public function extractSegment(Timecode $from_timecode=null, Timecode $to_timecode=null, $accurate=false)
+        public function extractSegment(Timecode $from_timecode=null, Timecode $to_timecode=null, $accurate=false, bool|Timecode $validateTimecode = true)
         {
 //          check that a segment extract has not already been set
             if(empty($this->_extract_segment) === false)
@@ -351,14 +351,17 @@
             }
             
 //          check the timecodes against the duration
-            $duration = $this->readDuration();
-            if($from_timecode !== null && $duration->total_seconds < $from_timecode->total_seconds)
-            {
-                throw new \InvalidArgumentException('The duration of the media is less than the starting timecode specified.');
-            }
-            else if($to_timecode !== null && $duration->total_seconds < $to_timecode->total_seconds)
-            {
-                throw new \InvalidArgumentException('The duration of the media is less than the end timecode specified.');
+            if ($validateTimecode) {
+                if ($validateTimecode instanceof Timecode) {
+                    $duration = $validateTimecode;
+                } else {
+                    $duration = $this->readDuration();
+                }
+                if ($from_timecode !== null && $duration->total_seconds < $from_timecode->total_seconds) {
+                    throw new \InvalidArgumentException('The duration of the media is less than the starting timecode specified.');
+                } else if($to_timecode !== null && $duration->total_seconds < $to_timecode->total_seconds) {
+                    throw new \InvalidArgumentException('The duration of the media is less than the end timecode specified.');
+                }
             }
             
             $this->_extract_segment = array(
@@ -716,7 +719,7 @@
          *  Media object on a successfull completion, otherwise an exception is thrown. If the blocking
          *  mode is non blocking then the underlying FfmpegProcess is returned.
          */
-        public function save($save_path=null, Format $output_format=null, $overwrite=Media::OVERWRITE_FAIL, ProgressHandlerAbstract &$progress_handler=null)
+        public function save($save_path=null, Format $output_format=null, $overwrite=Media::OVERWRITE_FAIL, ?ProgressHandlerAbstract $progress_handler=null)
         {
             $this->_saveAddInputFormatCommands($this->_media_input_format);
 
@@ -747,7 +750,9 @@
 //          set the progress handler 
             if($progress_handler !== null)
             {
-                $progress_handler->setTotalDuration($this->getEstimatedFinalDuration());
+                if ($progress_handler->getTotalDuration() === null) {
+                    $progress_handler->setTotalDuration($this->getEstimatedFinalDuration());
+                }
                 $this->_process->attachProgressHandler($progress_handler);
             }
             
@@ -806,7 +811,7 @@
          *  The last error message is set to Media->last_error_message. A full list of error messages is 
          *  available through Media->error_messages.
          */
-        public function saveNonBlocking($save_path=null, Format $output_format=null, $overwrite=self::OVERWRITE_FAIL, ProgressHandlerAbstract &$progress_handler=null)
+        public function saveNonBlocking($save_path=null, Format $output_format=null, $overwrite=self::OVERWRITE_FAIL, ?ProgressHandlerAbstract &$progress_handler=null)
         {
 //          check to see if the blocking mode has already been set to true. If it has we cannot save
 //          non-blocking and must trigger error.
@@ -1178,8 +1183,13 @@
          * @param boolean $read_from_cache 
          * @return array
          */
-        public function read($read_from_cache=true)
+        public function read($read_from_cache=true, bool $read_from_probe=true)
         {
+            if ($read_from_probe) {
+                $probe = new MediaProbeParser($this->getConfig());
+                return $probe->getFileInformation($this->getMediaPath(), $read_from_cache);
+            }
+
             return parent::getFileInformation($this->_media_file_path, $read_from_cache);
         }
         
@@ -1191,8 +1201,13 @@
          * @param boolean $read_from_cache 
          * @return mixed Returns a Timecode object if the duration is found, otherwise returns null.
          */
-        public function readDuration($read_from_cache=true)
+        public function readDuration($read_from_cache=true, bool $read_from_probe=true)
         {
+            if ($read_from_probe) {
+                $probe = new MediaProbeParser($this->getConfig());
+                return $probe->getFileDuration($this->getMediaPath(), $read_from_cache);
+            }
+
             return parent::getFileDuration($this->_media_file_path, $read_from_cache);
         }
         
@@ -1204,8 +1219,13 @@
          * @param boolean $read_from_cache 
          * @return mixed Returns a Timecode object if the duration is found, otherwise returns null.
          */
-        public function readGlobalMetaData($read_from_cache=true)
+        public function readGlobalMetaData($read_from_cache=true, bool $read_from_probe=true)
         {
+            if ($read_from_probe) {
+                $probe = new MediaProbeParser($this->getConfig());
+                return $probe->getFileGlobalMetadata($this->getMediaPath(), $read_from_cache);
+            }
+
             return parent::getFileGlobalMetadata($this->_media_file_path, $read_from_cache);
         }
         
@@ -1217,8 +1237,13 @@
          * @param boolean $read_from_cache 
          * @return mixed Returns the bitrate as an integer if available otherwise returns -1.
          */
-        public function readBitrate($read_from_cache=true)
+        public function readBitrate($read_from_cache=true, bool $read_from_probe=true)
         {
+            if ($read_from_probe) {
+                $probe = new MediaProbeParser($this->getConfig());
+                return $probe->getFileBitrate($this->getMediaPath(), $read_from_cache);
+            }
+
             return parent::getFileBitrate($this->_media_file_path, $read_from_cache);
         }
         
@@ -1230,8 +1255,13 @@
          * @param boolean $read_from_cache 
          * @return mixed Returns a Timecode object if the start point is found, otherwise returns null.
          */
-        public function readStart($read_from_cache=true)
+        public function readStart($read_from_cache=true, bool $read_from_probe=true)
         {
+            if ($read_from_probe) {
+                $probe = new MediaProbeParser($this->getConfig());
+                return $probe->getFileStart($this->getMediaPath(), $read_from_cache);
+            }
+
             return parent::getFileStart($this->_media_file_path, $read_from_cache);
         }
         
@@ -1243,8 +1273,13 @@
          * @param boolean $read_from_cache 
          * @return mixed Returns a string 'audio' or 'video' if media is audio or video, otherwise returns null.
          */
-        public function readType($read_from_cache=true)
+        public function readType($read_from_cache=true, bool $read_from_probe=true)
         {
+            if ($read_from_probe) {
+                $probe = new MediaProbeParser($this->getConfig());
+                return $probe->getFileType($this->getMediaPath(), $read_from_cache);
+            }
+
             return parent::getFileType($this->_media_file_path, $read_from_cache);
         }
         
@@ -1256,8 +1291,13 @@
          * @param boolean $read_from_cache 
          * @return mixed Returns an array of found data, otherwise returns null.
          */
-        public function readVideoComponent($read_from_cache=true)
+        public function readVideoComponent($read_from_cache=true, bool $read_from_probe=true)
         {
+            if ($read_from_probe) {
+                $probe = new MediaProbeParser($this->getConfig());
+                return $probe->getFileVideoComponent($this->getMediaPath(), $read_from_cache);
+            }
+
             return parent::getFileVideoComponent($this->_media_file_path, $read_from_cache);
         }
 
@@ -1269,8 +1309,13 @@
          * @param boolean $read_from_cache
          * @return mixed Returns an array of found data, otherwise returns null.
          */
-        public function readVolumeComponent($read_from_cache=true)
+        public function readVolumeComponent($read_from_cache=true, bool $read_from_probe=true)
         {
+            if ($read_from_probe) {
+                $probe = new MediaProbeParser($this->getConfig());
+                return $probe->getFileVolumeComponent($this->getMediaPath(), $read_from_cache);
+            }
+
             return parent::getFileVolumeComponent($this->_media_file_path, $read_from_cache);
         }
         
@@ -1282,8 +1327,13 @@
          * @param boolean $read_from_cache 
          * @return mixed Returns an array of found data, otherwise returns null.
          */
-        public function readAudioComponent($read_from_cache=true)
+        public function readAudioComponent($read_from_cache=true, bool $read_from_probe=true)
         {
+            if ($read_from_probe) {
+                $probe = new MediaProbeParser($this->getConfig());
+                return $probe->getFileAudioComponent($this->getMediaPath(), $read_from_cache);
+            }
+
             return parent::getFileAudioComponent($this->_media_file_path, $read_from_cache);
         }
         
@@ -1295,8 +1345,13 @@
          * @param boolean $read_from_cache 
          * @return boolean
          */
-        public function readHasAudio($read_from_cache=true)
+        public function readHasAudio($read_from_cache=true, bool $read_from_probe=true)
         {
+            if ($read_from_probe) {
+                $probe = new MediaProbeParser($this->getConfig());
+                return $probe->getFileHasAudio($this->getMediaPath(), $read_from_cache);
+            }
+
             return parent::getFileHasAudio($this->_media_file_path, $read_from_cache);
         }
         
@@ -1308,8 +1363,13 @@
          * @param boolean $read_from_cache 
          * @return boolean
          */
-        public function readHasVideo($read_from_cache=true)
+        public function readHasVideo($read_from_cache=true, bool $read_from_probe=true)
         {
+            if ($read_from_probe) {
+                $probe = new MediaProbeParser($this->getConfig());
+                return $probe->getFileHasVideo($this->getMediaPath(), $read_from_cache);
+            }
+
             return parent::getFileHasVideo($this->_media_file_path, $read_from_cache);
         }
         
@@ -1321,8 +1381,13 @@
          * @param boolean $read_from_cache 
          * @return mixed Returns false if no data is returned, otherwise returns the raw data as a string.
          */
-        public function readRawInformation($read_from_cache=true)
+        public function readRawInformation($read_from_cache=true, bool $read_from_probe=true)
         {
+            if ($read_from_probe) {
+                $probe = new MediaProbeParser($this->getConfig());
+                return $probe->getFileRawInformation($this->getMediaPath(), $read_from_cache);
+            }
+
             return parent::getFileRawInformation($this->_media_file_path, $read_from_cache);
         }
     }
