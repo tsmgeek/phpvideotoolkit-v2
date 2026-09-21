@@ -811,7 +811,7 @@
          *  The last error message is set to Media->last_error_message. A full list of error messages is 
          *  available through Media->error_messages.
          */
-        public function saveNonBlocking($save_path=null, Format $output_format=null, $overwrite=self::OVERWRITE_FAIL, ?ProgressHandlerAbstract &$progress_handler=null)
+        public function saveNonBlocking($save_path=null, Format $output_format=null, $overwrite=self::OVERWRITE_FAIL, ?ProgressHandlerAbstract $progress_handler=null)
         {
 //          check to see if the blocking mode has already been set to true. If it has we cannot save
 //          non-blocking and must trigger error.

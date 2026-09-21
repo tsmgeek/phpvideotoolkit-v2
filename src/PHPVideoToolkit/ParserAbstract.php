@@ -27,6 +27,7 @@
         protected $_temp_directory;
         protected $_cacher;
         static $_cache = array();
+        protected Config $_config;
         
         public function __construct(Config $config=null, $program_config_key='ffmpeg')
         {

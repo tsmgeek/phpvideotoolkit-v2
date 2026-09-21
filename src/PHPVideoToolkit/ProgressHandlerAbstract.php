@@ -70,6 +70,7 @@
             if ($duration === true) {
                 throw new \InvalidArgumentException('$duration must be either Timecode|false.');
             }
+
             $this->_total_duration = $duration;
             
             return $this;

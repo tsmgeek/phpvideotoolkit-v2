@@ -37,7 +37,7 @@
 
         /**
          * [$_output_renamed description]
-         * @var [type]
+         * @var Media
          * @access private
          */
         protected $_media_object;

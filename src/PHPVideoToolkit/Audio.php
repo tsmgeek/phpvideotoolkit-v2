@@ -70,7 +70,7 @@
          * @param  PHPVideoToolkit\ProgressHandlerAbstract $progress_handler The progress handler attached to the save, if any. 
          * @return void
          */
-        protected function _savePreProcess(Format &$output_format=null, &$save_path, $overwrite, ?ProgressHandlerAbstract &$progress_handler=null)
+        protected function _savePreProcess(Format &$output_format=null, &$save_path, $overwrite, ?ProgressHandlerAbstract $progress_handler=null)
         {
             parent::_savePreProcess($output_format, $save_path, $overwrite, $progress_handler);
             

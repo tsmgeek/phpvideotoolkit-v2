@@ -95,9 +95,11 @@
                 $duration = null;
                 foreach ($matches[1] as $key => $time)
                 {
-                    if($duration === null || $time > $duration)
+                    $timecode = new Timecode($time, Timecode::INPUT_FORMAT_SECONDS);
+                    if($duration === null || $timecode->total_milliseconds > $duration->total_milliseconds)
                     {
-                        $duration = $time;
+                        $duration = $timecode;
+                    }
                     }
                 }
                 $data = $duration;
@@ -188,7 +190,7 @@
                 $start_timecode = null;
                 foreach ($matches[1] as $key => $time)
                 {
-                    $timecode = new Timecode($value, Timecode::INPUT_FORMAT_SECONDS);
+                    $timecode = new Timecode($time, Timecode::INPUT_FORMAT_SECONDS);
                     if($start_timecode === null || $start_timecode->total_seconds > $timecode->total_seconds)
                     {
                         $start_timecode = $timecode;
@@ -287,6 +289,7 @@
                         'dimensions'            =>  array(
                             'width'                 => isset($data_stream['width']) === true ? $data_stream['width'] : null,
                             'height'                => isset($data_stream['height']) === true ? $data_stream['height'] : null,
+                            'aspect_ratio_fix_warning'  => false,
                         ),
                         'bitrate'               => isset($data_stream['bit_rate']) === true ? $data_stream['bit_rate'] : null,
                         'time_bases'            => isset($data_stream['time_base']) === true ? array($data_stream['time_base']) : array(),
@@ -313,6 +316,7 @@
                         'start'                 => isset($data_stream['start_time']) === true ? new Timecode($data_stream['start_time'], Timecode::INPUT_FORMAT_SECONDS) : null,
                         'metadata'              => isset($data_stream['meta']) === true ? $data_stream['meta'] : null,
                         'disposition'           => isset($data_stream['disposition']) === true ? $data_stream['disposition'] : null,
+                         'side_data'             => isset($data_stream['side_data']) === true ? $data_stream['side_data'] : null,
                     );
                     if ($data['metadata'] == null) {
                         $data['metadata'] = isset($data_stream['metadata']) === true ? $data_stream['metadata'] : null;
@@ -320,7 +324,17 @@
                     if ($data['rotation'] == null) {
                         $data['rotation'] = isset($data['metadata']['rotate']) === true ? $data['metadata']['rotate'] : null;
                     }
+                    if ($data['rotation'] == null) {
+                        $data['rotation'] = isset($data['side_data']['rotation']) === true ? $data['side_data']['rotation'] : null;
+                    }
                     $data['codec']['raw']   = trim($data['codec']['name'].' ('.trim($data['codec']['tag_string'].' / '.$data['codec']['tag'], '/').')');
+                    if($data['pixel_aspect_ratio'] !== null && $data['pixel_aspect_ratio'] !== 'N/A' && $pixel_ratio = explode(':', $data['pixel_aspect_ratio'], 2))
+                    {
+                        if($pixel_ratio[0] < $pixel_ratio[1] && $data['dimensions']['width'] > $data['dimensions']['height'])
+                        {
+                            $data['dimensions']['aspect_ratio_fix_warning'] = true;
+                        }
+                    }
 
                     // Unused but available data within the stream
                     // has_b_frames=0
@@ -584,6 +598,8 @@
 //          process each line of data
             $data = array();
             $index = 0;
+            $sideData = false;
+            $multiLineKey = null;
             foreach($raw_data as $line)
             {
                 if($line === '[STREAM]')
@@ -594,13 +610,25 @@
                 }
                 else if($line === '[/STREAM]')
                 {
+                    $multiLineKey = null;
+                    continue;
+                }
+                else if($line === '[SIDE_DATA]')
+                {
+                    $sideData = true;
+                    continue;
+                }
+                else if($line === '[/SIDE_DATA]')
+                {
+                    $sideData = false;
+                    $multiLineKey = null;
                     continue;
                 }
 
                 $chunks = explode('=', $line);
                 $key = array_shift($chunks);
 
-                if(empty($key) === true)
+                if(!$multiLineKey && empty($key) === true)
                 {
                     continue;
                 }
@@ -623,6 +651,28 @@
                         $data[$index]['disposition'] = array();
                     }
                     $data[$index]['disposition'][substr($key, 12)] = $value;
+                    continue;
+                }
+
+                if ($sideData === true)
+                {
+                    if(isset($data[$index]['side_data']) === false)
+                    {
+                        $data[$index]['side_data'] = array();
+                    }
+                    if ($value === '') {
+                        $multiLineKey = $key;
+                        $data[$index]['side_data'][$key] = '';
+                        continue;
+                    }
+                    if ($multiLineKey) {
+                        $data[$index]['side_data'][$multiLineKey] = trim($data[$index]['side_data'][$multiLineKey]."\n".$line);
+                        if ($line === '') {
+                            $multiLineKey = null;
+                        }
+                        continue;
+                    }
+                    $data[$index]['side_data'][$key] = $value;
                     continue;
                 }
 
